@@ -1,1 +1,6 @@
+#!/bin/bash
+echo "Upgrading pip, setuptools, wheel..."
+pip install --upgrade pip setuptools wheel
 
+# Call default S2I assemble script
+exec /usr/libexec/s2i/assemble
