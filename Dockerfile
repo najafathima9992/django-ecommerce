@@ -1,25 +1,27 @@
-FROM registry.access.redhat.com/ubi9/python-311
+# Use official Python S2I base image
+FROM registry.redhat.io/rhscl/python-39-rhel8:latest
 
+# Switch to root to install dependencies
 USER root
 
-RUN dnf install -y \
-    gcc \
-    gcc-c++ \
-    make \
-    libjpeg-turbo-devel \
-    zlib-devel \
-    freetype-devel \
+# Update pip, setuptools, wheel to latest compatible versions
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+# Install any OS-level dependencies your app needs (e.g., gcc, libffi, etc.)
+RUN dnf install -y gcc libffi-devel bzip2 bzip2-devel \
     && dnf clean all
 
-WORKDIR /app
+# Switch back to non-root user (OpenShift runs as random UID)
+USER 1001
 
-COPY requirements.txt .
+# Copy application code
+COPY . /opt/app-root/src/
 
-RUN pip install --upgrade pip setuptools<70 wheel
-RUN pip install -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /opt/app-root/src/requirements.txt
 
-COPY . .
+# Set default working directory
+WORKDIR /opt/app-root/src/
 
-EXPOSE 8080
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]
+# Run the app
+CMD ["python3", "app.py"]
