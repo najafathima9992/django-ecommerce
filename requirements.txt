@@ -1,5 +1,5 @@
-setuptools<70
-wheel
+setuptools==67.8.0
+wheel==0.41.2
 autopep8==1.4.4
 certifi==2019.3.9
 chardet==3.0.4
